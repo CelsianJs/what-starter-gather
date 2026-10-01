@@ -64,6 +64,6 @@ Planned public repo: `CelsianJs/what-starter-gather`.
 - `src/data/recipes.js` — synthetic static recipe content.
 - `src/routes.js` — route table and route metadata.
 - `src/pages/Build.jsx` — public implementation notes.
-- `scripts/static-aliases.mjs` — static route aliases, route-specific titles, 404, and Vura manifest proof.
+- `scripts/static-aliases.mjs` — static route aliases, route-specific titles, and a real `404.html` for Vura static synthesis.
 
 See [BUILD.md](./BUILD.md) and `/build` for the longer implementation guide.

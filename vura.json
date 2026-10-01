@@ -7,7 +7,7 @@
       }
     },
     {
-      "source": "/recipes/*",
+      "source": "/recipes/(.*)",
       "headers": {
         "Cache-Control": "public, max-age=300, stale-while-revalidate=3600"
       }
@@ -29,16 +29,6 @@
       "headers": {
         "Cache-Control": "public, max-age=600"
       }
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/recipes",
-      "destination": "/recipes/"
-    },
-    {
-      "source": "/404",
-      "destination": "/404.html"
     }
   ]
 }

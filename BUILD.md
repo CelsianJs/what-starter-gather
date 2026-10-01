@@ -24,6 +24,17 @@ The state module validates stored JSON before using it. If a browser has malform
 
 Routes live in `src/routes.js` rather than a file-router so this starter is easy to copy into any Vite project. The recipe route uses `/recipes/:slug`; unknown routes render `NotFound`.
 
+## Vura static deployment notes
+
+Gather is a pure Vite/What client app, so it does not ship a manual `dist/manifest.json` or import `@celsian/vura-core`. Vura can synthesize the static manifest from the built HTML files, concrete aliases, and `404.html`.
+
+Two schema rules matter for this starter:
+
+- `vura.json` only uses supported top-level keys. Static aliases come from files, not an unsupported top-level `rewrites` key.
+- Header sources use the Vura routing matcher syntax, so catch-alls are written as `(.*)` instead of `*`.
+
+The source-backed check is Vura Platform's shared config parser in `vura-platform/packages/shared/src/config/vura-config.ts` plus the route matcher in `routing-rules.ts`. After removing the manual server-style manifest path, `createDistArchive()` in the Vura CLI packed Gather at about 22.7 KiB instead of including project dependencies.
+
 ## Issues encountered
 
 - The app avoids React-style `to` props and uses `href` on What router `Link`, matching the current router docs.
@@ -37,6 +48,7 @@ Routes live in `src/routes.js` rather than a file-router so this starter is easy
 - Problem: direct recipe links need to work on static hosting. Fix: generate concrete aliases from `src/data/recipes.js`. Proof: `npm run build` prints `static aliases OK: 10 routes plus 404` and Playwright opens every recipe route.
 - Problem: localStorage can contain corrupt JSON or throw on write. Fix: `safeLoad()` validates shape and `persistSnapshot()` catches write failures. Proof: browser tests force `Storage.prototype.setItem` to throw and still add meals in-session.
 - Problem: homepage screenshots looked like a marketing splash, not a recipe tool. Fix: recipe scaling and weekly planning artifacts now render in the first viewport. Proof: screenshot tests capture `/` after asserting the new “recipe desk” heading.
+- Problem: an early Vura config mixed unsupported `rewrites`, `*` header globs, and a manual manifest for a static app. Fix: rely on concrete HTML aliases, valid `(.*)` matchers, and Vura's static manifest synthesis. Proof: `parseVuraJson()` accepts the config, no `dist/manifest.json` remains after build, and the Vura CLI archive is about 22.7 KiB.
 
 ## Verification
 

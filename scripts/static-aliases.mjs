@@ -35,13 +35,4 @@ for (const route of routes) writeRoute(...route);
 writeRoute('/404', 'Page not found — Gather', 'Gather includes a genuine 404 artifact for Vura static hosting.');
 copyFileSync(join('dist', '404', 'index.html'), join('dist', '404.html'));
 
-const manifest = {
-  pages: routes.map(([path]) => ({
-    urlPattern: path,
-    mode: 'static',
-    config: path === '/planner' || path === '/shopping-list' ? { cache: 'private' } : { tags: ['gather-content'] },
-  })),
-  api: [],
-};
-writeFileSync(join('dist', 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
 console.log(`static aliases OK: ${routes.length} routes plus 404`);
