@@ -1,6 +1,7 @@
+import { signal } from 'what-framework';
 import { Link, route } from 'what-framework/router';
 import { findRecipe, formatIngredient, scaleIngredient } from '../data/recipes.js';
-import { addRecipeToDay, getServings, setServings } from '../state/planner.js';
+import { addRecipeToDay, dayHasOpenSlot, daySlotLabel, days, firstOpenDay, getServings, saveNote, setServings } from '../state/planner.js';
 
 export default function RecipeDetail() {
   const recipe = findRecipe(route.params.slug);
@@ -12,6 +13,10 @@ export default function RecipeDetail() {
         <Link class="button" href="/recipes">Return to recipes</Link>
       </section>
     );
+  }
+  const selectedDay = signal(firstOpenDay(), `gather.detailDay.${recipe.slug}`);
+  function addToSelectedDay() {
+    addRecipeToDay(selectedDay(), recipe.slug);
   }
 
   return (
@@ -36,7 +41,16 @@ export default function RecipeDetail() {
               <li>{formatIngredient(scaleIngredient(ingredient, recipe.baseServings, getServings(recipe.slug)))}</li>
             ))}
           </ul>
-          <button class="button primary" onClick={() => addRecipeToDay('Monday', recipe.slug)}>Add to Monday</button>
+          <div class="plan-control">
+            <label>
+              <span>Plan this recipe</span>
+              <select value={selectedDay} onInput={(event) => selectedDay(event.target.value)} onChange={(event) => selectedDay(event.target.value)}>
+                {days.map((day) => <option value={day} disabled={!dayHasOpenSlot(day)}>{daySlotLabel(day)}</option>)}
+              </select>
+            </label>
+            <button class="button primary" onClick={addToSelectedDay}>{() => `Add to ${selectedDay()}`}</button>
+            <p class="fine-print">{() => saveNote()}</p>
+          </div>
         </section>
         <section class="paper-panel">
           <h2>Method</h2>

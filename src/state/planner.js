@@ -83,6 +83,22 @@ export const shoppingList = computed(() => {
     .sort((a, b) => a.item.localeCompare(b.item));
 });
 
+export function dayHasOpenSlot(day) {
+  return days.includes(day) && weeklyPlan()[day].length < 2;
+}
+
+export function firstOpenDay() {
+  return days.find((day) => weeklyPlan()[day].length === 0) || days.find((day) => dayHasOpenSlot(day)) || days[0];
+}
+
+export function daySlotLabel(day) {
+  if (!days.includes(day)) return 'Not available';
+  const count = weeklyPlan()[day].length;
+  if (count === 0) return `${day} · open`;
+  if (count === 1) return `${day} · one meal planned`;
+  return `${day} · full`;
+}
+
 export function toggleTag(tag) {
   selectedTags((tags) => (tags.includes(tag) ? tags.filter((item) => item !== tag) : [...tags, tag]));
 }
@@ -104,7 +120,16 @@ export function setServings(slug, servings) {
 }
 
 export function addRecipeToDay(day, slug) {
-  if (!days.includes(day) || !findRecipe(slug)) return;
+  const recipe = findRecipe(slug);
+  if (!days.includes(day) || !recipe) return;
+  if (weeklyPlan()[day].includes(slug)) {
+    saveNote(`${recipe.title} is already planned on ${day}. Pick another day or remove it first.`);
+    return;
+  }
+  if (!dayHasOpenSlot(day)) {
+    saveNote(`${day} already has two meals. Pick an open day before adding another recipe.`);
+    return;
+  }
   weeklyPlan((plan) => ({ ...plan, [day]: [...plan[day], slug] }));
 }
 

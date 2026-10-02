@@ -1,6 +1,19 @@
+import { signal } from 'what-framework';
 import { dietaryTags, recipes } from '../data/recipes.js';
 import { RecipeCard } from '../components/RecipeCard.jsx';
-import { addRecipeToDay, clearFilters, filteredRecipes, query, selectedTags, toggleTag } from '../state/planner.js';
+import { addRecipeToDay, dayHasOpenSlot, days, firstOpenDay, clearFilters, filteredRecipes, query, selectedTags, toggleTag } from '../state/planner.js';
+
+function RecipePlanAction({ recipe }) {
+  const selectedDay = signal(firstOpenDay(), `gather.cardDay.${recipe.slug}`);
+  return (
+    <span class="mini-plan">
+      <select aria-label={`Choose day for ${recipe.title}`} value={selectedDay} onInput={(event) => selectedDay(event.target.value)} onChange={(event) => selectedDay(event.target.value)}>
+        {days.map((day) => <option value={day} disabled={!dayHasOpenSlot(day)}>{day}</option>)}
+      </select>
+      <button class="button small" onClick={() => addRecipeToDay(selectedDay(), recipe.slug)}>Add</button>
+    </span>
+  );
+}
 
 export default function Recipes() {
   return (
@@ -35,7 +48,7 @@ export default function Recipes() {
       ) : (
         <div class="recipe-grid">
           {filteredRecipes().map((recipe) => (
-            <RecipeCard recipe={recipe} action={<button class="button small" onClick={() => addRecipeToDay('Sunday', recipe.slug)}>Add to Sunday</button>} />
+            <RecipeCard recipe={recipe} action={<RecipePlanAction recipe={recipe} />} />
           ))}
         </div>
       )}

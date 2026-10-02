@@ -42,12 +42,15 @@ The source-backed check is Vura Platform's shared config parser in `vura-platfor
 - No external images or fonts are used so the starter remains deterministic and fast in CI.
 - The first design pass over-weighted the homepage headline. The fix was to make `src/pages/Home.jsx` a market workbench: the live scaled recipe card, explanatory copy, and planner slip all appear above the fold.
 - Serving controls are deliberately stored by recipe slug in `servingOverrides`; this keeps `/recipes/:slug`, the homepage docket, and the shopping-list computation aligned without route-specific state.
+- A review caught the hard-coded "Add to Monday" detail action. The fix is an accessible day selector that defaults to the first completely empty day, disables full days, and gives clear duplicate copy when the same recipe is already planned on an occupied day.
+- Reactive button labels in What JSX need function children (`{() => ...}`) when the accessible name changes after a select input. The planner detail button uses that pattern so tests can find "Add to Thursday" after the day changes.
 
 ## Problem → fix → proof
 
 - Problem: direct recipe links need to work on static hosting. Fix: generate concrete aliases from `src/data/recipes.js`. Proof: `npm run build` prints `static aliases OK: 10 routes plus 404` and Playwright opens every recipe route.
 - Problem: localStorage can contain corrupt JSON or throw on write. Fix: `safeLoad()` validates shape and `persistSnapshot()` catches write failures. Proof: browser tests force `Storage.prototype.setItem` to throw and still add meals in-session.
 - Problem: homepage screenshots looked like a marketing splash, not a recipe tool. Fix: recipe scaling and weekly planning artifacts now render in the first viewport. Proof: screenshot tests capture `/` after asserting the new “recipe desk” heading.
+- Problem: recipe detail and recipe cards silently sent meals to fixed days. Fix: both surfaces now expose native day selects backed by `firstOpenDay()`, `dayHasOpenSlot()`, and duplicate-day guards. Proof: Playwright selects Thursday from the detail page, verifies the Thursday planner card, and checks the occupied-Monday no-op copy.
 - Problem: an early Vura config mixed unsupported `rewrites`, `*` header globs, and a manual manifest for a static app. Fix: rely on concrete HTML aliases, valid `(.*)` matchers, and Vura's static manifest synthesis. Proof: `parseVuraJson()` accepts the config, no `dist/manifest.json` remains after build, and the Vura CLI archive is about 22.7 KiB.
 
 ## Verification

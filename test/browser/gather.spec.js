@@ -29,8 +29,12 @@ test('search, filter, detail scaling, planner, shopping list, and screenshots', 
   await page.getByRole('link', { name: 'Miso Orchard Noodles' }).click();
   await page.getByLabel('Servings').fill('4');
   await expect(page.getByText('12 oz soba noodles')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Add to Tuesday' })).toBeVisible();
+  await page.getByLabel('Plan this recipe').selectOption('Thursday');
+  await page.getByRole('button', { name: 'Add to Thursday' }).click();
 
   await page.getByRole('link', { name: 'Planner' }).click();
+  await expect(page.locator('.day-card').filter({ has: page.getByRole('heading', { name: 'Thursday' }) }).locator('.planned-list').getByText('Miso Orchard Noodles')).toBeVisible();
   await page.locator('select').first().selectOption('green-market-congee');
   await expect(page.locator('.planned-list').first().getByText('Green Market Congee')).toBeVisible();
   await page.getByRole('link', { name: 'Shopping List' }).click();
@@ -66,6 +70,16 @@ test('storage-denied browsers keep session edits without crashing', async ({ pag
   await page.locator('select').first().selectOption('green-market-congee');
   await expect(page.locator('.planned-list').first().getByText('Green Market Congee')).toBeVisible();
   await expect(page.getByText(/not saved in this browser/i)).toBeVisible();
+});
+
+test('recipe detail defaults to the first empty day and refuses duplicate occupied days', async ({ page }) => {
+  await page.goto('/recipes/miso-orchard-noodles');
+  await expect(page.getByRole('button', { name: 'Add to Tuesday' })).toBeVisible();
+  await page.getByLabel('Plan this recipe').selectOption('Monday');
+  await page.getByRole('button', { name: 'Add to Monday' }).click();
+  await expect(page.locator('#content').getByText(/already planned on Monday/i)).toBeVisible();
+  await page.goto('/planner');
+  await expect(page.locator('.day-card').filter({ has: page.getByRole('heading', { name: 'Monday' }) }).locator('.planned-list').getByText('Miso Orchard Noodles')).toHaveCount(1);
 });
 
 test('keyboard focus reaches planner reset', async ({ page }) => {

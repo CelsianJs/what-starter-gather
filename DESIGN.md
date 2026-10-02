@@ -27,7 +27,7 @@
 - Content hierarchy: short editorial summary, catalog cards, recipe detail, planner grid, consolidated list, implementation explanation
 
 ## Design principles
-- Principle 1: Make state changes visible and reversible.
+- Principle 1: Make state changes visible, reversible, and never silently overwrite an occupied day.
 - Principle 2: Keep recipe content warm and crafted while keeping controls utilitarian.
 - Tradeoffs: static content is synthetic and local; interactivity is deliberately client-only for portability.
 
@@ -42,7 +42,7 @@
 ## Components
 - Existing components to reuse: none; standalone starter
 - New/changed components: shell, recipe card/detail, planner slot, shopping group, build note panels
-- Variants and states: empty filters, empty day, saved planner, reset confirmation, keyboard focus, mobile stack
+- Variants and states: empty filters, empty day, full day, duplicate recipe in a day, saved planner, reset confirmation, keyboard focus, mobile stack
 - Token/component ownership: `src/styles.css` owns tokens; components stay in `src/components`
 
 ## Accessibility
@@ -62,7 +62,7 @@
 - Empty: no matching recipes and no planned meals have explicit copy
 - Error: malformed local storage is ignored and reset to defaults
 - Success: saved-note copy and planner/shopping counts update immediately
-- Disabled: recipe add buttons remain active; empty planner slots explain next step
+- Disabled: full days disable in the recipe detail day selector; duplicate additions show explicit no-op copy instead of overwriting
 - Offline/slow network: app is static and local once loaded
 
 ## Content voice
