@@ -21,7 +21,7 @@ export default function Recipes() {
       <div class="page-heading">
         <p class="eyebrow">Recipe index</p>
         <h1>Filter the pantry.</h1>
-        <p>Search static recipe content and stack dietary filters; every result links to a routeable detail page.</p>
+        <p>Search the local recipe box, stack dietary filters, and open a full recipe card for ingredients, method, and planning.</p>
       </div>
       <div class="filter-panel" role="search">
         <label>
