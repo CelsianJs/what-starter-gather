@@ -10,11 +10,19 @@ test.beforeEach(async ({ page }) => {
     }
   });
   page.on('pageerror', (error) => page.consoleErrors.push(error.message));
-  await page.addInitScript(() => localStorage.removeItem('what-starter-gather-v1'));
+  await page.addInitScript(() => {
+    if (!sessionStorage.getItem('gather-test-started')) {
+      localStorage.removeItem('what-starter-gather-v1');
+      sessionStorage.setItem('gather-test-started', 'yes');
+    }
+  });
 });
 
 test.afterEach(async ({ page }) => {
   expect(page.consoleErrors).toEqual([]);
+  const viewportWidth = page.viewportSize().width;
+  const widths = await page.evaluate(() => [document.documentElement.scrollWidth, document.body.scrollWidth]);
+  for (const width of widths) expect(width).toBeLessThanOrEqual(viewportWidth);
 });
 
 test('search, filter, detail scaling, planner, shopping list, and screenshots', async ({ page }, testInfo) => {
@@ -87,4 +95,35 @@ test('keyboard focus reaches planner reset', async ({ page }) => {
   await page.keyboard.press('Tab');
   await expect(page.locator(':focus')).toBeVisible();
   await expect(page.getByRole('button', { name: /reset week/i })).toBeVisible();
+});
+
+test('market checks survive navigation and reload and can clear without changing meals', async ({ page }) => {
+  await page.goto('/shopping-list');
+  const first = page.getByRole('checkbox').first();
+  await first.check();
+  await expect(page.getByText(/1 picked up/)).toBeVisible();
+  await page.getByRole('link', { name: 'Planner', exact: true }).click();
+  await page.getByRole('link', { name: 'Shopping List', exact: true }).click();
+  await expect(page.getByRole('checkbox').first()).toBeChecked();
+  await page.reload();
+  await expect(page.getByRole('checkbox').first()).toBeChecked();
+  await page.getByRole('button', { name: 'Clear checks' }).click();
+  await expect(page.getByRole('checkbox').first()).not.toBeChecked();
+  await expect(page.getByText('3 meals planned', { exact: true })).toBeVisible();
+});
+
+test('denied storage keeps market check changes in session', async ({ page }) => {
+  await page.addInitScript(() => { Storage.prototype.setItem = () => { throw new Error('denied'); }; });
+  await page.goto('/shopping-list');
+  await page.getByRole('checkbox').first().check();
+  await expect(page.getByText(/1 picked up/)).toBeVisible();
+  await page.getByRole('link', { name: 'Planner', exact: true }).click();
+  await page.getByRole('link', { name: 'Shopping List', exact: true }).click();
+  await expect(page.getByRole('checkbox').first()).toBeChecked();
+  await expect(page.getByText(/not saved in this browser/i)).toBeVisible();
+});
+
+test('build guide keeps literal checklist source readable on mobile', async ({ page }) => {
+  await page.goto('/build');
+  await expect(page.locator('pre code')).toContainText('setIngredientChecked(ingredientKey(ingredient), event.target.checked)');
 });

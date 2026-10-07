@@ -1,5 +1,5 @@
 import { Link } from 'what-framework/router';
-import { resetPlanner, shoppingList } from '../state/planner.js';
+import { checkedIngredients, clearChecks, ingredientKey, marketProgress, resetPlanner, setIngredientChecked, shoppingList } from '../state/planner.js';
 import { formatIngredient } from '../data/recipes.js';
 
 export default function ShoppingList() {
@@ -13,6 +13,11 @@ export default function ShoppingList() {
         </div>
         <Link class="button" href="/planner">Edit planner</Link>
       </div>
+      <div class="market-summary">
+        <p role="status">{() => `${marketProgress().pickedUp} picked up · ${marketProgress().remaining} remaining · ${marketProgress().total} ingredients`}</p>
+        <button class="button ghost" disabled={() => marketProgress().pickedUp === 0} onClick={clearChecks}>Clear checks</button>
+        <small>Checks save in this browser. Clear checks leaves your meals and serving sizes unchanged.</small>
+      </div>
       {shoppingList().length === 0 ? (
         <div class="empty-state">
           <h2>Your list is empty.</h2>
@@ -21,9 +26,9 @@ export default function ShoppingList() {
       ) : (
         <div class="shopping-list">
           {shoppingList().map((ingredient) => (
-            <article class="shopping-row">
+            <article class={() => `shopping-row ${checkedIngredients().includes(ingredientKey(ingredient)) ? 'is-picked-up' : ''}`} key={ingredientKey(ingredient)}>
               <label>
-                <input type="checkbox" />
+                <input type="checkbox" checked={() => checkedIngredients().includes(ingredientKey(ingredient))} onChange={(event) => setIngredientChecked(ingredientKey(ingredient), event.target.checked)} />
                 <span>{formatIngredient(ingredient)}</span>
               </label>
               <small>Used by {ingredient.recipes.join(', ')}</small>
