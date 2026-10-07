@@ -2,7 +2,7 @@
 
 ## Source of truth
 - Status: Active
-- Last refreshed: 2026-10-01
+- Last refreshed: 2026-10-07
 - Primary product surfaces: recipe index, recipe detail, weekly planner, shopping list, build notes
 - Evidence reviewed: What Framework routing/state examples, current getting-started guidance, and the Vura deploy script pattern used by these starters
 
@@ -76,6 +76,11 @@
 - Performance constraints: static data, computed filters, no external assets or runtime network
 - Compatibility constraints: modern browsers supported by Vite output and What router
 - Test/screenshot expectations: Vitest store tests plus Playwright desktop/mobile flows and screenshots
+
+## Market checklist behavior
+- Ingredient item/unit keys own checked state; counts derive from the currently planned ingredients, not stale rows.
+- Checked rows are struck through but retain readable quantity/source copy. Picked-up and remaining counts are live status text.
+- Clear checks leaves recipes and servings intact; reset planner clears checks with the seed week. Both persist locally with the existing session-only denied-storage fallback.
 
 ## Open questions
 - [ ] Choose the final Vura subdomain during deployment.

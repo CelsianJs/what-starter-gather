@@ -53,6 +53,13 @@ The source-backed check is Vura Platform's shared config parser in `vura-platfor
 - Problem: recipe detail and recipe cards silently sent meals to fixed days. Fix: both surfaces now expose native day selects backed by `firstOpenDay()`, `dayHasOpenSlot()`, and duplicate-day guards. Proof: Playwright selects Thursday from the detail page, verifies the Thursday planner card, and checks the occupied-Monday no-op copy.
 - Problem: an early Vura config mixed unsupported `rewrites`, `*` header globs, and a manual manifest for a static app. Fix: rely on concrete HTML aliases, valid `(.*)` matchers, and Vura's static manifest synthesis. Proof: `parseVuraJson()` accepts the config, no `dist/manifest.json` remains after build, and the Vura CLI archive is about 22.7 KiB.
 
+## Market checklist completion
+
+The market checkboxes were previously DOM-only: navigating away lost purchased marks. `checkedIngredients` now persists ingredient `item|unit` keys alongside the planner and serving overrides; `marketProgress` counts only keys on the current computed list. Old snapshots default to no checks, unknown keys are ignored, and denied writes retain session editing. `Clear checks` changes no meals or serving overrides; resetting the planner also clears checks.
+
+Smooth path: derive list quantities first, use stable ingredient keys for checked accessors, and test navigation/reload/denied storage before adding remote sync. Regression coverage is in `test/checklist.test.js` and the market checklist browser flow.
+
+
 ## Verification
 
 Expected gates:

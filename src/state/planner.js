@@ -16,12 +16,15 @@ function seedPlan() {
   };
 }
 
+export const ingredientKey = (ingredient) => `${ingredient.item}|${ingredient.unit}`;
+const knownIngredients = new Set(recipes.flatMap((recipe) => recipe.ingredients.map(ingredientKey)));
+
 function safeLoad() {
-  if (typeof localStorage === 'undefined') return { plan: seedPlan(), servings: {} };
+  if (typeof localStorage === 'undefined') return { plan: seedPlan(), servings: {}, checked: [] };
   try {
     const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
     if (!parsed || typeof parsed !== 'object' || !parsed.plan || !parsed.servings) {
-      return { plan: seedPlan(), servings: {} };
+      return { plan: seedPlan(), servings: {}, checked: [] };
     }
     const plan = seedPlan();
     for (const day of days) {
@@ -29,9 +32,9 @@ function safeLoad() {
         plan[day] = parsed.plan[day].filter((slug) => findRecipe(slug));
       }
     }
-    return { plan, servings: parsed.servings };
+    return { plan, servings: parsed.servings, checked: Array.isArray(parsed.checked) ? [...new Set(parsed.checked.filter((key) => knownIngredients.has(key)))] : [] };
   } catch {
-    return { plan: seedPlan(), servings: {} };
+    return { plan: seedPlan(), servings: {}, checked: [] };
   }
 }
 
@@ -41,6 +44,7 @@ export const query = signal('', 'gather.query');
 export const selectedTags = signal([], 'gather.tags');
 export const weeklyPlan = signal(initial.plan, 'gather.weeklyPlan');
 export const servingOverrides = signal(initial.servings, 'gather.servings');
+export const checkedIngredients = signal(initial.checked, 'gather.checkedIngredients');
 export const saveNote = signal('Planner is saved locally in this browser.', 'gather.saveNote');
 
 export const filteredRecipes = computed(() => {
@@ -82,6 +86,20 @@ export const shoppingList = computed(() => {
     .map((item) => ({ ...item, amount: Math.round(item.amount * 100) / 100, recipes: [...item.recipes] }))
     .sort((a, b) => a.item.localeCompare(b.item));
 });
+
+export const marketProgress = computed(() => {
+  const total = shoppingList().length;
+  const checked = new Set(checkedIngredients());
+  const pickedUp = shoppingList().filter((ingredient) => checked.has(ingredientKey(ingredient))).length;
+  return { total, pickedUp, remaining: total - pickedUp };
+});
+
+export function setIngredientChecked(key, checked) {
+  if (!shoppingList().some((ingredient) => ingredientKey(ingredient) === key)) return;
+  checkedIngredients((keys) => checked ? [...new Set([...keys, key])] : keys.filter((item) => item !== key));
+}
+
+export function clearChecks() { checkedIngredients([]); }
 
 export function dayHasOpenSlot(day) {
   return days.includes(day) && weeklyPlan()[day].length < 2;
@@ -140,6 +158,7 @@ export function removeRecipeFromDay(day, index) {
 export function resetPlanner() {
   weeklyPlan(seedPlan());
   servingOverrides({});
+  clearChecks();
   saveNote('Planner reset to the seed week.');
 }
 
@@ -156,6 +175,7 @@ effect(() => {
   const snapshot = {
     plan: weeklyPlan(),
     servings: servingOverrides(),
+    checked: checkedIngredients(),
   };
   if (typeof localStorage !== 'undefined') {
     persistSnapshot(snapshot);

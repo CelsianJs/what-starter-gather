@@ -4,6 +4,16 @@ export default function Build() {
       <p class="eyebrow">Agent reference</p>
       <h1>How Gather is built.</h1>
       <section>
+        <h2>A checklist that travels with the plan</h2>
+        <p>The former native checkboxes lost their state when the route remounted. <code>checkedIngredients</code> now stores item/unit keys with the same local snapshot; <code>marketProgress</code> counts only ingredients in the current list. Clear checks never changes meals or serving sizes.</p>
+        <pre><code>{`export const ingredientKey = (ingredient) =>
+  \`\${ingredient.item}|\${ingredient.unit}\`;
+
+setIngredientChecked(ingredientKey(ingredient), event.target.checked);
+clearChecks();`}</code></pre>
+        <p>Keep stable ingredient keys, read checked state in accessors, and test navigation, reload, and denied storage before adding account sync.</p>
+      </section>
+      <section>
         <h2>Signals</h2>
         <p><code>src/state/planner.js</code> keeps search, filters, weekly plan, serving overrides, and save notes in module-scoped signals.</p>
       </section>

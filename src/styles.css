@@ -441,3 +441,9 @@ input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible
     transition: none !important;
   }
 }
+.market-summary { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; padding: 1rem 0; border-block: 1px solid var(--line); margin-bottom: 1rem; }
+.market-summary p { margin: 0; font-weight: 700; }
+.market-summary small { flex-basis: 100%; }
+.shopping-row.is-picked-up label span { text-decoration: line-through; opacity: .65; }
+.button:disabled { opacity: .5; cursor: not-allowed; }
+.build-notes pre { max-width: 100%; white-space: pre-wrap; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 1.5; }
