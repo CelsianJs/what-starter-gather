@@ -2,7 +2,7 @@
 
 ## Source of truth
 - Status: Active
-- Last refreshed: 2026-10-07
+- Last refreshed: 2026-10-08
 - Primary product surfaces: recipe index, recipe detail, weekly planner, shopping list, build notes
 - Evidence reviewed: What Framework routing/state examples, current getting-started guidance, and the Vura deploy script pattern used by these starters
 
@@ -32,12 +32,12 @@
 - Tradeoffs: static content is synthetic and local; interactivity is deliberately client-only for portability.
 
 ## Visual language
-- Color: linen backgrounds, terracotta actions, forest-green filters, black-olive type
-- Typography: Georgia for editorial headings and system sans for controls so the starter ships without font dependencies
-- Spacing/layout rhythm: the homepage opens as a market-table workbench: a scaled recipe docket, compact explanatory copy, and a weekly planner slip appear in the first viewport instead of a dominant marketing hero
-- Shape/radius/elevation: soft paper cards with one-sided shadows, torn-ticket separators, and fine botanical borders
-- Motion: subtle page/card entrance and reduced-motion fallback; no parallax
-- Imagery/iconography: CSS-only ingredient marks, scaled ingredient lists, and planner slips; no external image assets
+- Color: quiet warm-neutral page (`#f8f7f4`), white surfaces, terracotta actions, forest-green selected navigation and filters.
+- Typography: shared local Avenir Next / Segoe UI Variable / Segoe UI sans-serif stack; body 16px/1.6, labels and controls 14px, headings 28–36px/1.2, section headings 24px/1.3, brand 24px.
+- Spacing/layout rhythm: 8px-based spacing; retain the three-column recipe workbench on desktop, but put the primary planning task and actions first on mobile.
+- Shape/radius/elevation: quiet 1px borders and 8px corners; no paper rotations, background grids, shadows, or pill navigation.
+- Motion: short route entrance with reduced-motion support.
+- Imagery/iconography: existing local recipe marks and real scaled ingredient content; no external images.
 
 ## Components
 - Existing components to reuse: none; standalone starter
@@ -48,7 +48,7 @@
 ## Accessibility
 - Target standard: WCAG 2.1 AA-minded implementation
 - Keyboard/focus behavior: visible focus rings, native controls, route links and planner buttons keyboard reachable
-- Contrast/readability: dark text on linen, high-contrast selected states
+- Contrast/readability: dark text on quiet white/neutral surfaces, high-contrast selected states
 - Screen-reader semantics: one `h1` per route, labelled search/filter controls, status text for planner summary
 - Reduced motion and sensory considerations: `prefers-reduced-motion` disables animations and transitions
 
