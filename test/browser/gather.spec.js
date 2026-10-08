@@ -127,3 +127,52 @@ test('build guide keeps literal checklist source readable on mobile', async ({ p
   await page.goto('/build');
   await expect(page.locator('pre code')).toContainText('setIngredientChecked(ingredientKey(ingredient), event.target.checked)');
 });
+
+test('all seeded checklist labels have a44px hit area without stretching checkboxes', async ({ page }) => {
+  for (const viewport of [{ width: 1440, height: 1000 }, { width: 390, height: 844 }]) {
+    await page.setViewportSize(viewport);
+    await page.goto('/shopping-list');
+    await expect(page.getByRole('checkbox')).toHaveCount(21);
+    const geometry = await page.locator('.shopping-row label').evaluateAll(labels => labels.map(label => ({
+      label: label.getBoundingClientRect().height,
+      checkbox: label.querySelector('input').getBoundingClientRect().width,
+    })));
+    expect(geometry).toHaveLength(21);
+    for (const row of geometry) {
+      expect(row.label).toBeGreaterThanOrEqual(44);
+      expect(row.checkbox).toBeLessThanOrEqual(24);
+    }
+  }
+});
+
+
+test('modern typography and touch geometry remain consistent across routes', async ({ page }) => {
+  for (const viewport of [{ width: 1440, height: 1000 }, { width: 390, height: 844 }]) {
+    await page.setViewportSize(viewport);
+    for (const route of ["/","/recipes/cedar-supper-beans","/planner","/shopping-list","/build"]) {
+      await page.goto(route);
+      await expect(page.locator('h1')).toBeVisible();
+      const metrics = await page.evaluate(() => {
+        const heading = getComputedStyle(document.querySelector('h1'));
+        const body = getComputedStyle(document.body);
+        const targets = [...document.querySelectorAll('nav a, button, .button, a.brand')].filter(node => node.getClientRects().length);
+        const navRows = new Map();
+        for (const link of document.querySelectorAll('nav a')) {
+          const top = Math.round(link.getBoundingClientRect().top);
+          navRows.set(top, (navRows.get(top) || 0) + 1);
+        }
+        return { navRows: [...navRows.values()], heading: parseFloat(heading.fontSize), family: body.fontFamily, body: body.fontSize, overflow: document.documentElement.scrollWidth > innerWidth, smallTargets: targets.filter(node => node.getBoundingClientRect().height < 43.9).map(node => node.textContent) };
+      });
+      expect(metrics.family).toContain('Avenir Next');
+      expect(metrics.body).toBe('16px');
+      expect(metrics.heading).toBeGreaterThanOrEqual(28);
+      expect(metrics.heading).toBeLessThanOrEqual(36);
+      expect(metrics.overflow).toBe(false);
+      expect(metrics.smallTargets).toEqual([]);
+      if (viewport.width === 390) expect(metrics.navRows).toEqual([3, 2]);
+      const firstNav = page.locator('nav a').first();
+      await firstNav.focus();
+      await expect(firstNav).toHaveCSS('outline-style', 'solid');
+    }
+  }
+});
